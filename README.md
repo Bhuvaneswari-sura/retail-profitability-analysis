@@ -6,6 +6,9 @@ A US office-supplies retailer grew sales by **51% between 2014 and 2017**, but i
 
 > **Key finding:** every order line discounted by more than 20% loses money on average. They are only 14% of order lines, but they wipe out **$135k** of profit. Capping discounts at 20% would raise profit by an estimated **+47% to +77%**.
 
+![Power BI dashboard](images/dashboard.png)
+*Power BI dashboard ([`dashboard/retail_profitability.pbix`](dashboard/retail_profitability.pbix)). The **Discount Cap** selector recalculates "Profit Recovered" live for any cap from 0% to 75%.*
+
 ---
 
 ## Business questions
@@ -67,7 +70,7 @@ Derived fields added: `ship_days`, `order_year`, `order_month`, `discount_band`,
 CTEs · window functions (`LAG`, `RANK`, `ROW_NUMBER`) · `CASE` banding · `HAVING` · scenario modelling in SQL. The key queries are in [`sql/analysis_queries.sql`](sql/analysis_queries.sql).
 
 ### 3. Dashboard
-An interactive Power BI report with KPI cards, trend, profit by sub-category, margin by discount band, a state map and a **what-if slider for the discount cap**. Build steps and DAX measures are in [`dashboard/POWERBI_GUIDE.md`](dashboard/POWERBI_GUIDE.md).
+A one-page Power BI report (`dashboard/retail_profitability.pbix`) with KPI cards, monthly sales trend, profit by sub-category, margin by discount band, profit by state and a **what-if Discount Cap selector**. It is driven by DAX measures such as `Profit Margin %`, `Loss-Making Lines %` and a `SUMX` scenario measure (`Profit with Cap`) that reprices every deep-discount line at the chosen cap. The measures are documented in [`dashboard/POWERBI_GUIDE.md`](dashboard/POWERBI_GUIDE.md).
 
 ## Repository structure
 ```
