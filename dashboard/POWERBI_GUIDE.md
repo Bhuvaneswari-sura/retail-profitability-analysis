@@ -1,5 +1,7 @@
 # Power BI Dashboard: Build Guide
 
+The finished report is `dashboard/retail_profitability.pbix`. This guide documents how it was built so it can be rebuilt or extended.
+
 One-page report built on `data/processed/superstore_clean.csv`. It takes about 45–60 minutes in Power BI Desktop (free from the Microsoft Store).
 
 ## 1. Load the data
@@ -49,25 +51,36 @@ Sales YoY % = DIVIDE ( [Total Sales] - [Sales PY], [Sales PY] )
 
 Format `Profit Margin %`, `Loss-Making Lines %` and `Sales YoY %` as **Percentage**, and the money measures as **Currency ($)**.
 
-## 4. What-if slider: discount cap
-This is the standout feature. Managers drag a slider and see the profit they would recover.
+## 4. What-if selector: discount cap
+This is the standout feature. Pick a cap and see how much profit would be recovered.
 
-1. **Modeling → New parameter → Numeric range**. Name it `Discount Cap`, set Min 0, Max 0.8, Increment 0.05, Default 0.2, and tick **Add slicer to this page**.
+1. **Modeling → New table**:
+```DAX
+Discount Cap = SELECTCOLUMNS ( GENERATESERIES ( 0, 0.8, 0.05 ), "Discount Cap", [Value] )
+```
 2. Add these measures:
 ```DAX
+Discount Cap Value = SELECTEDVALUE ( 'Discount Cap'[Discount Cap], 0.2 )
+
 Profit with Cap =
-SUMX (
-    orders,
-    IF (
-        orders[discount] > [Discount Cap Value],
-        orders[profit] + orders[list_price_sales] * ( 1 - [Discount Cap Value] ) - orders[sales],
-        orders[profit]
+VAR cap = [Discount Cap Value]
+RETURN
+    SUMX (
+        orders,
+        IF (
+            orders[discount] > cap,
+            orders[profit] + orders[list_price_sales] * ( 1 - cap ) - orders[sales],
+            orders[profit]
+        )
     )
-)
 
 Profit Recovered = [Profit with Cap] - [Total Profit]
 ```
-*Assumption (state it on the page):* volume holds at the capped discount, so this is the best case.
+3. Add a **slicer** on `'Discount Cap'[Discount Cap]` (style: Dropdown, Single select) and a card showing `Profit Recovered`. At a 20% cap it shows **$219.15K**, which matches the best-case figure from notebook 02.
+
+*Assumption:* volume holds at the capped discount, so this is the best case.
+
+> **Formatting note:** on a PC with an Indian or other non-UK/US locale, `#,0` formats can group digits as 22,96,919. Cards avoid this with **Display units = Auto** (e.g. $2.30M).
 
 ## 5. Page layout
 | Area | Visual | Fields |
